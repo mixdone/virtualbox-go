@@ -265,6 +265,99 @@ func (vb *VBox) Reset(vm *VirtualMachine) (string, error) {
 func (vb *VBox) EnableIOAPIC(vm *VirtualMachine) (string, error) {
 	return vb.modify(vm, "--ioapic", "on")
 }
+
+func (vb *VBox) VMInfoGetRules(machine *VirtualMachine) (*VirtualMachine, error) {
+	out, err := vb.manage("showvminfo", machine.UUIDOrName(), "--machinereadable")
+	if err != nil {
+		return nil, ErrMachineNotExist
+	}
+
+	optionList := make([]([2]any), 0, 20)
+	_ = parseKeyValues(out, reKeyEqVal, func(key, val string) error {
+		if strings.HasPrefix(key, "\"") {
+			if k, err := strconv.Unquote(key); err == nil {
+				key = k
+			} //else ignore; might need to warn in log
+		}
+		if strings.HasPrefix(val, "\"") {
+			if val, err := strconv.Unquote(val); err == nil {
+				optionList = append(optionList, [2]any{key, val})
+			}
+		} else if i, err := strconv.Atoi(val); err == nil {
+			optionList = append(optionList, [2]any{key, i})
+		} else { // we dont expect any actually
+			glog.V(6).Infof("ignoring parsing val %s for key %s", val, key)
+		}
+		return nil
+	})
+
+	amountOFNICs := len(machine.Spec.NICs)
+	if amountOFNICs == 0 {
+		return machine, nil
+	}
+
+	position := 0
+	for i := 1; i <= amountOFNICs; i++ {
+		keyNIC := fmt.Sprintf("nic%d", i)
+		for {
+			if optionList[position][0] == keyNIC || position >= len(optionList)-1 {
+				break
+			}
+			position++
+		}
+
+		parseRule := func(value string, index int) (*PortForwarding, error) {
+			data := strings.Split(value, ",")
+			if len(data) != 6 {
+				return nil, fmt.Errorf("some problems with rule, sorry (-____-)")
+			}
+
+			protocol := TCP
+			if data[1] == "udp" {
+				protocol = UDP
+			}
+
+			hostPort, err := strconv.Atoi(data[3])
+			if err != nil {
+				return nil, err
+			}
+
+			guestPort, err := strconv.Atoi(data[5])
+
+			newPortForwarding := &PortForwarding{
+				Index:     index,
+				Name:      data[0],
+				Protocol:  protocol,
+				HostIP:    data[2],
+				HostPort:  hostPort,
+				GuestIP:   data[4],
+				GuestPort: guestPort,
+			}
+			return newPortForwarding, nil
+		}
+
+		nextNICkey := fmt.Sprint("nic%d", i+1)
+		portForwardingKey := "Forwarding(0)"
+		ruleId := 0
+		machine.Spec.NICs[i-1].PortForwarding = make([]PortForwarding, 0)
+		for {
+			if optionList[position][0] == portForwardingKey {
+				portForwarding, err := parseRule(optionList[position][1].(string), ruleId)
+				if err != nil {
+					return machine, err
+				}
+				machine.Spec.NICs[i-1].PortForwarding = append(machine.Spec.NICs[i-1].PortForwarding, *portForwarding)
+				ruleId++
+				portForwardingKey = fmt.Sprintf("Forwarding(%d)", ruleId)
+			} else if position >= len(optionList)-1 || optionList[position][0] == nextNICkey {
+				break
+			}
+			position++
+		}
+	}
+	return machine, nil
+}
+
 func (vb *VBox) VMInfo(uuidOrVmName string) (machine *VirtualMachine, err error) {
 	out, err := vb.manage("showvminfo", uuidOrVmName, "--machinereadable")
 	if err != nil {
@@ -509,7 +602,8 @@ func (vb *VBox) VMInfo(uuidOrVmName string) (machine *VirtualMachine, err error)
 		vm.Spec.NICs = append(vm.Spec.NICs, nic)
 	}
 
-	return vm, nil
+	updatedVm, err := vb.VMInfoGetRules(vm)
+	return updatedVm, err
 }
 
 func (vb *VBox) Define(context context.Context, vm *VirtualMachine) (*VirtualMachine, error) {
