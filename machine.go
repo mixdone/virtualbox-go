@@ -151,6 +151,19 @@ func (vb *VBox) ModifyVM(vm *VirtualMachine, parameters []string) error {
 					fmt.Sprintf("--nic%d", nic.Index), string(nic.Mode),
 					fmt.Sprintf("--nictype%d", nic.Index), string(nic.Type),
 					fmt.Sprintf("--cableconnected%d", nic.Index), cableConnected)
+
+				if nic.Mode == NWMode_nat && len(nic.PortForwarding) > 0 {
+					for i := 0; i < len(nic.PortForwarding); i++ {
+						pf := nic.PortForwarding[i]
+						protocol := "tcp"
+						if nic.PortForwarding[i].Protocol == UDP {
+							protocol = "udp"
+						}
+						args = append(args, fmt.Sprintf("--natpf%d", nic.Index),
+							fmt.Sprintf("%v,%v,%v,%d,%v,%d", pf.Name, protocol, pf.HostIP, pf.HostPort, pf.GuestIP, pf.GuestPort))
+					}
+				}
+
 				switch nic.Mode {
 				case NWMode_bridged:
 					args = append(args, fmt.Sprintf("--bridgeadapter%d", nic.Index), nic.NetworkName)
@@ -304,6 +317,10 @@ func (vb *VBox) VMInfoGetRules(machine *VirtualMachine) (*VirtualMachine, error)
 				break
 			}
 			position++
+		}
+
+		if optionList[position][0] == keyNIC && optionList[position][1] != "nat" {
+			continue
 		}
 
 		parseRule := func(value string, index int) (*PortForwarding, error) {
