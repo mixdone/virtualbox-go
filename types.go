@@ -130,6 +130,7 @@ const (
 
 type PortForwarding struct {
 	Index     int
+	NicIndex  int
 	Name      string
 	Protocol  NetProtocol
 	HostIP    string

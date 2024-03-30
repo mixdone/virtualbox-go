@@ -152,18 +152,6 @@ func (vb *VBox) ModifyVM(vm *VirtualMachine, parameters []string) error {
 					fmt.Sprintf("--nictype%d", nic.Index), string(nic.Type),
 					fmt.Sprintf("--cableconnected%d", nic.Index), cableConnected)
 
-				if nic.Mode == NWMode_nat && len(nic.PortForwarding) > 0 {
-					for i := 0; i < len(nic.PortForwarding); i++ {
-						pf := nic.PortForwarding[i]
-						protocol := "tcp"
-						if nic.PortForwarding[i].Protocol == UDP {
-							protocol = "udp"
-						}
-						args = append(args, fmt.Sprintf("--natpf%d", nic.Index),
-							fmt.Sprintf("%v,%v,%v,%d,%v,%d", pf.Name, protocol, pf.HostIP, pf.HostPort, pf.GuestIP, pf.GuestPort))
-					}
-				}
-
 				switch nic.Mode {
 				case NWMode_bridged:
 					args = append(args, fmt.Sprintf("--bridgeadapter%d", nic.Index), nic.NetworkName)
@@ -323,7 +311,7 @@ func (vb *VBox) VMInfoGetRules(machine *VirtualMachine) (*VirtualMachine, error)
 			continue
 		}
 
-		parseRule := func(value string, index int) (*PortForwarding, error) {
+		parseRule := func(value string, index int, nicNumber int) (*PortForwarding, error) {
 			data := strings.Split(value, ",")
 			if len(data) != 6 {
 				return nil, fmt.Errorf("some problems with rule, sorry (-____-)")
@@ -342,6 +330,7 @@ func (vb *VBox) VMInfoGetRules(machine *VirtualMachine) (*VirtualMachine, error)
 			guestPort, err := strconv.Atoi(data[5])
 
 			newPortForwarding := &PortForwarding{
+				NicIndex:  nicNumber,
 				Index:     index,
 				Name:      data[0],
 				Protocol:  protocol,
@@ -359,7 +348,7 @@ func (vb *VBox) VMInfoGetRules(machine *VirtualMachine) (*VirtualMachine, error)
 		machine.Spec.NICs[i-1].PortForwarding = make([]PortForwarding, 0)
 		for {
 			if optionList[position][0] == portForwardingKey {
-				portForwarding, err := parseRule(optionList[position][1].(string), ruleId)
+				portForwarding, err := parseRule(optionList[position][1].(string), ruleId, i)
 				if err != nil {
 					return machine, err
 				}
