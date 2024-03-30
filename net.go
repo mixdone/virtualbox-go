@@ -12,6 +12,23 @@ func (vb *VBox) PortForwarding(vm *VirtualMachine, rule PortForwarding) error {
 	return err
 }
 
+func (vb *VBox) AddALlPortForw(vm *VirtualMachine, rule []PortForwarding) error {
+	args := []string{"modifyvm", vm.UUIDOrName()}
+	for i := 0; i < len(rule); i++ {
+		args = append(args, fmt.Sprintf("--natpf%d", rule[i].NicIndex), fmt.Sprintf("%v,%v,%v,%v,%v,%v", rule[i].Name, string(rule[i].Protocol),
+			rule[i].HostIP, rule[i].HostPort, rule[i].GuestIP, rule[i].GuestPort))
+	}
+	_, err := vb.manage(args...)
+	return err
+}
+
+func (vb *VBox) DeleteAllPortForw(vm *VirtualMachine, nicIndex int) {
+	args := []string{"modifyvm", vm.UUIDOrName()}
+	for i := 0; i < len(vm.Spec.NICs[nicIndex].PortForwarding); i++ {
+		args = append(args, fmt.Sprintf("--natpf%d", nicIndex), "delete", vm.Spec.NICs[nicIndex].PortForwarding[i].Name)
+	}
+}
+
 func (vb *VBox) PortForwardingDelete(vm *VirtualMachine, index int, name string) error {
 	_, err := vb.manage("modifyvm", vm.UUIDOrName(), fmt.Sprintf("--natpf%d", index), "delete", name)
 	return err
