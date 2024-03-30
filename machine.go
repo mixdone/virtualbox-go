@@ -285,7 +285,7 @@ func (vb *VBox) VMInfoGetRules(machine *VirtualMachine) (*VirtualMachine, error)
 		return nil, ErrMachineNotExist
 	}
 
-	optionList := make([]([2]any), 0, 20)
+	optionList := make([]([2]interface{}), 0, 20)
 	_ = parseKeyValues(out, reKeyEqVal, func(key, val string) error {
 		if strings.HasPrefix(key, "\"") {
 			if k, err := strconv.Unquote(key); err == nil {
@@ -294,10 +294,10 @@ func (vb *VBox) VMInfoGetRules(machine *VirtualMachine) (*VirtualMachine, error)
 		}
 		if strings.HasPrefix(val, "\"") {
 			if val, err := strconv.Unquote(val); err == nil {
-				optionList = append(optionList, [2]any{key, val})
+				optionList = append(optionList, [2]interface{}{key, val})
 			}
 		} else if i, err := strconv.Atoi(val); err == nil {
-			optionList = append(optionList, [2]any{key, i})
+			optionList = append(optionList, [2]interface{}{key, i})
 		} else { // we dont expect any actually
 			glog.V(6).Infof("ignoring parsing val %s for key %s", val, key)
 		}
