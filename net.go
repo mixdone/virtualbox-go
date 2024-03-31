@@ -22,10 +22,10 @@ func (vb *VBox) AddALlPortForw(vm *VirtualMachine, rule []PortForwarding) error 
 	return err
 }
 
-func (vb *VBox) DeleteAllPortForw(vm *VirtualMachine, nicIndex int, rule []PortForwarding) {
+func (vb *VBox) DeleteAllPortForw(vm *VirtualMachine, rule []PortForwarding) {
 	args := []string{"modifyvm", vm.UUIDOrName()}
 	for i := 0; i < len(rule); i++ {
-		args = append(args, fmt.Sprintf("--natpf%d", nicIndex), "delete", rule[i].Name)
+		args = append(args, fmt.Sprintf("--natpf%d", rule[i].NicIndex), "delete", rule[i].Name)
 	}
 }
 
