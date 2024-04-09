@@ -13,9 +13,11 @@ const (
 
 type DiskType string
 
-const DVDDrive = DiskType("dvddrive")
-const HDDrive = DiskType("hdd")
-const FDDrive = DiskType("fdd")
+const (
+	DVDDrive = DiskType("dvddrive")
+	HDDrive  = DiskType("hdd")
+	FDDrive  = DiskType("fdd")
+)
 
 func (d DiskType) ForShowMedium() string {
 	switch d {
@@ -28,6 +30,16 @@ func (d DiskType) ForShowMedium() string {
 	}
 	return ""
 }
+
+type VirtualMachineState string
+
+const (
+	Poweroff = VirtualMachineState("poweroff")
+	Running  = VirtualMachineState("running")
+	Paused   = VirtualMachineState("paused")
+	Saved    = VirtualMachineState("saved")
+	Aborted  = VirtualMachineState("aborted")
+)
 
 type Disk struct {
 	// Path represents the absolute path in the system where the disk is stored, normally is under the vm folder
@@ -56,6 +68,11 @@ type StorageController struct {
 	Instance  int
 	PortCount int
 	Bootable  string //on, off
+}
+
+type Snapshot struct {
+	Name        string
+	Description string
 }
 
 type CPU struct {
@@ -101,6 +118,25 @@ type NIC struct {
 	BootPrio        int
 	PromiscuousMode string
 	MAC             string //auto assigns mac automatically
+	PortForwarding  []PortForwarding
+}
+
+type NetProtocol string
+
+const (
+	TCP = NetProtocol("tcp")
+	UDP = NetProtocol("udp")
+)
+
+type PortForwarding struct {
+	Index     int
+	NicIndex  int
+	Name      string
+	Protocol  NetProtocol
+	HostIP    string
+	HostPort  int
+	GuestIP   string
+	GuestPort int
 }
 
 type Network struct {
@@ -127,6 +163,11 @@ type VirtualMachineSpec struct {
 	OSType             OSType
 	StorageControllers []StorageController
 	Boot               []BootDevice
+	State              VirtualMachineState
+	Snapshots          []Snapshot
+	CurrentSnapshot    Snapshot
+	DragAndDrop        string
+	Clipboard          string
 }
 
 type VirtualMachine struct {
@@ -157,4 +198,16 @@ type OSType struct {
 	FamilyID          string
 	FamilyDescription string
 	Bit64             bool
+}
+
+type NatNetwork struct {
+	Enabled      bool
+	NetName      string
+	Network      string
+	DHCP         bool
+	Ipv6         bool
+	Loopback4    string
+	Loopback6    string
+	PortForward4 string
+	PortForward6 string
 }
