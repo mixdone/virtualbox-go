@@ -177,7 +177,7 @@ func (vb *VBox) CreateNet(net *Network) error {
 func (vb *VBox) ChangeNet(net *Network) error {
 	switch net.Mode {
 	case NWMode_hostonly:
-		_, err := vb.manage("hostonlyif", "ipconfig", net.Name, "--ip", net.IPNet.IP.(string), "--netmask", net.IPNet.Mask.(string))
+		_, err := vb.manage("hostonlyif", "ipconfig", net.Name, "--ip", fmt.Sprintf("%v", net.IPNet.IP), "--netmask", fmt.Sprintf("%v", net.IPNet.Mask))
 		if err != nil {
 			return err
 		}
