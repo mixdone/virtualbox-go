@@ -2,10 +2,21 @@ package virtualbox
 
 import (
 	"fmt"
+	"net"
 	"regexp"
 	"sort"
 	"strings"
 )
+
+func (vb *VBox) PortForwarding(vm *VirtualMachine, rule PortForwarding) error {
+	_, err := vb.manage("modifyvm", vm.UUIDOrName(), fmt.Sprintf("--natpf%d", rule.Index), fmt.Sprintf("%v,%v,%v,%v,%v,%v", rule.Name, string(rule.Protocol), rule.HostIP, rule.HostPort, rule.GuestIP, rule.GuestPort))
+	return err
+}
+
+func (vb *VBox) PortForwardingDelete(vm *VirtualMachine, index int, name string) error {
+	_, err := vb.manage("modifyvm", vm.UUIDOrName(), fmt.Sprintf("--natpf%d", index), "delete", name)
+	return err
+}
 
 func (vb *VBox) HostOnlyNetInfo() ([]Network, error) {
 	out, err := vb.manage("list", "hostonlyifs")
@@ -22,6 +33,10 @@ func (vb *VBox) HostOnlyNetInfo() ([]Network, error) {
 			nw.Name = val
 		case "GUID":
 			nw.GUID = val
+		case "IPAddress":
+			nw.IPNet.IP = net.ParseIP(val)
+		case "NetworkMask":
+			nw.IPNet.Mask = net.IPMask(val)
 		case "HardwareAddress":
 			nw.HWAddress = val
 		case "VBoxNetworkName":
@@ -174,10 +189,10 @@ func (vb *VBox) CreateNet(net *Network) error {
 	return err
 }
 
-func (vb *VBox) ChangeNet(net *Network) error {
-	switch net.Mode {
+func (vb *VBox) ChangeNet(netCurr *Network) error {
+	switch netCurr.Mode {
 	case NWMode_hostonly:
-		_, err := vb.manage("hostonlyif", "ipconfig", net.Name, "--ip", fmt.Sprintf("%v", net.IPNet.IP), "--netmask", fmt.Sprintf("%v", net.IPNet.Mask))
+		_, err := vb.manage("hostonlyif", "ipconfig", "vboxnet0", "--ip", netCurr.IPNet.IP.String(), "--netmask", net.IP(netCurr.IPNet.Mask).String())
 		if err != nil {
 			return err
 		}
@@ -187,7 +202,6 @@ func (vb *VBox) ChangeNet(net *Network) error {
 }
 
 func (vb *VBox) DeleteNet(net *Network) error {
-
 	switch net.Mode {
 	case NWMode_hostonly:
 		_, err := vb.manage("hostonlyif", "remove", net.Name)
