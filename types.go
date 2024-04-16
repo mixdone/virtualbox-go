@@ -171,3 +171,19 @@ type OSType struct {
 	FamilyDescription string
 	Bit64             bool
 }
+
+type option func(Command)
+
+type Command interface {
+	setOptions(opts ...option) Command
+	isGuest() bool
+	path() string
+	run(args ...string) (string, string, error)
+}
+
+type command struct {
+	program string
+	sudoer  bool
+	sudo    bool
+	guest   bool
+}
