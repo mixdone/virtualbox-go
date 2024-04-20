@@ -206,8 +206,6 @@ type NatNetwork struct {
 	Network      string
 	DHCP         bool
 	Ipv6         bool
-	Loopback4    string
-	Loopback6    string
-	PortForward4 string
-	PortForward6 string
+	PortForward4 []PortForwarding
+	PortForward6 []PortForwarding
 }
