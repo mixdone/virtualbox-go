@@ -70,6 +70,11 @@ type StorageController struct {
 	Bootable  string //on, off
 }
 
+type Snapshot struct {
+	Name        string
+	Description string
+}
+
 type CPU struct {
 	Count int
 }
@@ -113,6 +118,25 @@ type NIC struct {
 	BootPrio        int
 	PromiscuousMode string
 	MAC             string //auto assigns mac automatically
+	PortForwarding  []PortForwarding
+}
+
+type NetProtocol string
+
+const (
+	TCP = NetProtocol("tcp")
+	UDP = NetProtocol("udp")
+)
+
+type PortForwarding struct {
+	Index     int
+	NicIndex  int
+	Name      string
+	Protocol  NetProtocol
+	HostIP    string
+	HostPort  int
+	GuestIP   string
+	GuestPort int
 }
 
 type Network struct {
@@ -140,6 +164,10 @@ type VirtualMachineSpec struct {
 	StorageControllers []StorageController
 	Boot               []BootDevice
 	State              VirtualMachineState
+	Snapshots          []Snapshot
+	CurrentSnapshot    Snapshot
+	DragAndDrop        string
+	Clipboard          string
 }
 
 type VirtualMachine struct {
@@ -172,6 +200,15 @@ type OSType struct {
 	Bit64             bool
 }
 
+type NatNetwork struct {
+	Enabled      bool
+	NetName      string
+	Network      string
+	DHCP         bool
+	Ipv6         bool
+	PortForward4 []PortForwarding
+	PortForward6 []PortForwarding
+}
 type option func(Command)
 
 type Command interface {
