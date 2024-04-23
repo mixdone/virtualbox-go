@@ -199,3 +199,13 @@ type OSType struct {
 	FamilyDescription string
 	Bit64             bool
 }
+
+type NatNetwork struct {
+	Enabled      bool
+	NetName      string
+	Network      string
+	DHCP         bool
+	Ipv6         bool
+	PortForward4 []PortForwarding
+	PortForward6 []PortForwarding
+}
