@@ -60,7 +60,6 @@ func NewVBox(config Config) *VBox {
 	}
 	return &VBox{
 		Config:      config,
-		Name:        "name",
 		HostOnlyNws: make(map[string]*Network),
 		BridgedNws:  make(map[string]*Network),
 		InternalNws: make(map[string]*Network),
