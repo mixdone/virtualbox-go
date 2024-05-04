@@ -209,6 +209,7 @@ type NatNetwork struct {
 	PortForward4 []PortForwarding
 	PortForward6 []PortForwarding
 }
+
 type option func(Command)
 
 type Command interface {
