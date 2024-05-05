@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/golang/glog"
 )
 
 func (vb *VBox) RemoveDHCPServer(netName string) error {
@@ -81,7 +79,7 @@ func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error) {
 
 	// lets populate the map from output strings
 	optionList := make([]([2]interface{}), 0, 20)
-	_ = parseKeyValues(out, reKeyEqVal, func(key, val string) error {
+	_ = parseKeyValues(out, reColonLine, func(key, val string) error {
 		if strings.HasPrefix(key, "\"") {
 			if k, err := strconv.Unquote(key); err == nil {
 				key = k
@@ -93,8 +91,6 @@ func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error) {
 			}
 		} else if i, err := strconv.Atoi(val); err == nil {
 			optionList = append(optionList, [2]interface{}{key, i})
-		} else { // we dont expect any actually
-			glog.V(6).Infof("ignoring parsing val %s for key %s", val, key)
 		}
 		return nil
 	})
