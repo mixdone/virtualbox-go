@@ -2,8 +2,6 @@ package virtualbox
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 )
 
 func (vb *VBox) RemoveDHCPServer(netName string) error {
@@ -71,26 +69,15 @@ func (vb *VBox) StopDHCPServer(netName string) error {
 	return err
 }
 
-func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error, string) {
+func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, string, [][2]interface{}, error) {
 	out, err := vb.manage("list", "dhcpservers")
 	if err != nil {
-		return nil, err, out
+		return nil, out, nil, err
 	}
 
 	optionList := make([]([2]interface{}), 0, 20)
 	_ = parseKeyValues(out, reColonLine, func(key, val string) error {
-		if strings.HasPrefix(key, "\"") {
-			if k, err := strconv.Unquote(key); err == nil {
-				key = k
-			}
-		}
-		if strings.HasPrefix(val, "\"") {
-			if val, err := strconv.Unquote(val); err == nil {
-				optionList = append(optionList, [2]interface{}{key, val})
-			}
-		} else if i, err := strconv.Atoi(val); err == nil {
-			optionList = append(optionList, [2]interface{}{key, i})
-		}
+		optionList = append(optionList, [2]interface{}{key, val})
 		return nil
 	})
 
@@ -113,5 +100,5 @@ func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error, string) {
 			}
 		}
 	}
-	return dhcp, nil, out
+	return dhcp, out, nil, nil
 }
