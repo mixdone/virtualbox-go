@@ -99,17 +99,16 @@ func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error) {
 		return nil
 	})
 
-	var dhcp *DHCPServer
+	dhcp := &DHCPServer{}
 
 	for i := 0; i < len(optionList); i++ {
 		if optionList[i][0] == "NetworkName" && optionList[i][1] == netName {
-			dhcp = &DHCPServer{
-				NetworkName:    (optionList[i][1]).(string),
-				IPAddress:      (optionList[i+1][1]).(string),
-				LowerIPAddress: (optionList[i+2][1]).(string),
-				UpperIPAddress: (optionList[i+3][1]).(string),
-				NetworkMask:    (optionList[i+4][1]).(string),
-			}
+
+			dhcp.NetworkName = (optionList[i][1]).(string)
+			dhcp.IPAddress = (optionList[i+1][1]).(string)
+			dhcp.LowerIPAddress = (optionList[i+2][1]).(string)
+			dhcp.UpperIPAddress = (optionList[i+3][1]).(string)
+			dhcp.NetworkMask = (optionList[i+4][1]).(string)
 
 			if (optionList[i+5][1]).(string) == "Yes" {
 				dhcp.Enabled = true
