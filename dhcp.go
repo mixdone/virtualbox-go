@@ -69,15 +69,15 @@ func (vb *VBox) StopDHCPServer(netName string) error {
 	return err
 }
 
-func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, string, [][2]interface{}, error) {
+func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, string, [][2]string, error) {
 	out, err := vb.manage("list", "dhcpservers")
 	if err != nil {
 		return nil, out, nil, err
 	}
 
-	optionList := make([]([2]interface{}), 0, 20)
+	optionList := make([]([2]string), 0, 20)
 	_ = parseKeyValues(out, reColonLine, func(key, val string) error {
-		optionList = append(optionList, [2]interface{}{key, val})
+		optionList = append(optionList, [2]string{key, val})
 		return nil
 	})
 
@@ -87,13 +87,13 @@ func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, string, [][2]interface{},
 		fmt.Println(optionList[i][0], ":", optionList[i][1])
 		if optionList[i][0] == "NetworkName" && optionList[i][1] == netName {
 
-			dhcp.NetworkName = (optionList[i][1]).(string)
-			dhcp.IPAddress = (optionList[i+1][1]).(string)
-			dhcp.LowerIPAddress = (optionList[i+2][1]).(string)
-			dhcp.UpperIPAddress = (optionList[i+3][1]).(string)
-			dhcp.NetworkMask = (optionList[i+4][1]).(string)
+			dhcp.NetworkName = (optionList[i][1])
+			dhcp.IPAddress = (optionList[i+1][1])
+			dhcp.LowerIPAddress = (optionList[i+2][1])
+			dhcp.UpperIPAddress = (optionList[i+3][1])
+			dhcp.NetworkMask = (optionList[i+4][1])
 
-			if (optionList[i+5][1]).(string) == "Yes" {
+			if (optionList[i+5][1]) == "Yes" {
 				dhcp.Enabled = true
 			} else {
 				dhcp.Enabled = false
