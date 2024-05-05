@@ -19,9 +19,9 @@ func (vb *VBox) AddDHCPServer(dhcp DHCPServer) (string, error) {
 		fmt.Sprintf("--lowerip=%s", dhcp.LowerIPAddress), fmt.Sprintf("--upperip=%s", dhcp.UpperIPAddress))
 
 	if dhcp.Enabled {
-		args = append(args, "--enabled")
+		args = append(args, "--enable")
 	} else {
-		args = append(args, "--disabled")
+		args = append(args, "--disable")
 	}
 	return vb.manage(args...)
 }
@@ -46,9 +46,9 @@ func (vb *VBox) ModifyDHCPServer(dhcp DHCPServer, parametrs []string) error {
 		case "upperip":
 			args = append(args, "--upperip", dhcp.UpperIPAddress)
 		case "work":
-			tmp := "--disabled"
+			tmp := "--disable"
 			if dhcp.Enabled {
-				tmp = "--enabled"
+				tmp = "--enable"
 			}
 			args = append(args, tmp)
 		}
