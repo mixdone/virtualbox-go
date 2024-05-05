@@ -29,14 +29,14 @@ func (vb *VBox) ModifyDHCPServer(dhcp DHCPServer, parametrs []string) error {
 
 	args := []string{"dhcpserver", "modify"}
 
+	args = append(args, fmt.Sprintf("--netname=%s", dhcp.NetworkName))
+
 	for _, s := range parametrs {
 		switch s {
-		case "netname":
-			args = append(args, "--netname", dhcp.NetworkName)
 		case "netmask":
 			args = append(args, "--netmask", dhcp.NetworkMask)
 		case "ip":
-			args = append(args, "--ip", dhcp.IPAddress)
+			args = append(args, "--server-ip", dhcp.IPAddress)
 		case "lowerip":
 			args = append(args, "--lowerip", dhcp.LowerIPAddress)
 		case "upperip":
