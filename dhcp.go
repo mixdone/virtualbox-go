@@ -77,13 +77,12 @@ func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error) {
 		return nil, err
 	}
 
-	// lets populate the map from output strings
 	optionList := make([]([2]interface{}), 0, 20)
 	_ = parseKeyValues(out, reColonLine, func(key, val string) error {
 		if strings.HasPrefix(key, "\"") {
 			if k, err := strconv.Unquote(key); err == nil {
 				key = k
-			} //else ignore; might need to warn in log
+			}
 		}
 		if strings.HasPrefix(val, "\"") {
 			if val, err := strconv.Unquote(val); err == nil {
@@ -98,6 +97,7 @@ func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error) {
 	dhcp := &DHCPServer{}
 
 	for i := 0; i < len(optionList); i++ {
+		fmt.Println(optionList[i][0], ":", optionList[i][1])
 		if optionList[i][0] == "NetworkName" && optionList[i][1] == netName {
 
 			dhcp.NetworkName = (optionList[i][1]).(string)
