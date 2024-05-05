@@ -23,7 +23,8 @@ var DefaultVBBasePath = GetDefaultVBBasePath()
 var reColonLine = regexp.MustCompile(`([^:]+):\s+(.*)`)
 
 // parses lines like the following
-//  foo="bar"
+//
+//	foo="bar"
 var reKeyEqVal = regexp.MustCompile(`([^=]+)=\s*(.*)`)
 
 // Config for the Manager
@@ -78,7 +79,7 @@ func IsVBoxError(err error) bool {
 	return ok
 }
 
-//VBoxError are errors that are returned as error by Virtualbox cli on stderr
+// VBoxError are errors that are returned as error by Virtualbox cli on stderr
 type VBoxError string
 
 func (ve VBoxError) Error() string {
