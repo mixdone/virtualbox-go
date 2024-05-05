@@ -71,10 +71,10 @@ func (vb *VBox) StopDHCPServer(netName string) error {
 	return err
 }
 
-func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error) {
+func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error, []([2]interface{})) {
 	out, err := vb.manage("list", "dhcpservers")
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 
 	optionList := make([]([2]interface{}), 0, 20)
@@ -113,5 +113,5 @@ func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error) {
 			}
 		}
 	}
-	return dhcp, nil
+	return dhcp, nil, optionList
 }
