@@ -45,6 +45,7 @@ type Config struct {
 type VBox struct {
 	Config  Config
 	Verbose bool
+	Name    string
 	// as discovered and includes networks created out of band (not through this api)
 	// TODO: Merge them to a single map and provide accessors for specific filtering
 	HostOnlyNws map[string]*Network
