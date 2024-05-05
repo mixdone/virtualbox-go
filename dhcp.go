@@ -84,7 +84,6 @@ func (vb *VBox) DHCPInfo(netName string) (*DHCPServer, error) {
 	dhcp := &DHCPServer{}
 
 	for i := 0; i < len(optionList); i++ {
-		fmt.Println(optionList[i][0], ":", optionList[i][1])
 		if optionList[i][0] == "NetworkName" && optionList[i][1] == netName {
 
 			dhcp.NetworkName = (optionList[i][1])
