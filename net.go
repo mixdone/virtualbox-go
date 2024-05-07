@@ -36,7 +36,7 @@ func (vb *VBox) HostOnlyNetInfo() ([]Network, error) {
 		case "IPAddress":
 			nw.IPNet.IP = net.ParseIP(val)
 		case "NetworkMask":
-			nw.IPNet.Mask = net.IPMask(val)
+			nw.IPMask.IP = net.ParseIP(val)
 		case "HardwareAddress":
 			nw.HWAddress = val
 		case "VBoxNetworkName":
