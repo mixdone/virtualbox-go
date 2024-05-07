@@ -23,7 +23,8 @@ var DefaultVBBasePath = GetDefaultVBBasePath()
 var reColonLine = regexp.MustCompile(`([^:]+):\s+(.*)`)
 
 // parses lines like the following
-//  foo="bar"
+//
+//	foo="bar"
 var reKeyEqVal = regexp.MustCompile(`([^=]+)=\s*(.*)`)
 
 // Config for the Manager
@@ -44,6 +45,7 @@ type Config struct {
 type VBox struct {
 	Config  Config
 	Verbose bool
+	Name    string
 	// as discovered and includes networks created out of band (not through this api)
 	// TODO: Merge them to a single map and provide accessors for specific filtering
 	HostOnlyNws map[string]*Network
@@ -78,7 +80,7 @@ func IsVBoxError(err error) bool {
 	return ok
 }
 
-//VBoxError are errors that are returned as error by Virtualbox cli on stderr
+// VBoxError are errors that are returned as error by Virtualbox cli on stderr
 type VBoxError string
 
 func (ve VBoxError) Error() string {
