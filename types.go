@@ -143,6 +143,7 @@ type Network struct {
 	GUID       string
 	Name       string
 	IPNet      net.IPNet
+	IPMask     net.IPNet
 	Mode       NetworkMode
 	DeviceName string
 	HWAddress  string
