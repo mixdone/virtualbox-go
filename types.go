@@ -1,7 +1,5 @@
 package virtualbox
 
-import "net"
-
 type StorageControllerType string
 
 const (
@@ -142,8 +140,8 @@ type PortForwarding struct {
 type Network struct {
 	GUID       string
 	Name       string
-	IPNet      net.IPNet
-	IPMask     net.IPNet
+	IPNet      string
+	IPMask     string
 	Mode       NetworkMode
 	DeviceName string
 	HWAddress  string
