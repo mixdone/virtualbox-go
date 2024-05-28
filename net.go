@@ -8,7 +8,27 @@ import (
 )
 
 func (vb *VBox) PortForwarding(vm *VirtualMachine, rule PortForwarding) error {
-	_, err := vb.manage("modifyvm", vm.UUIDOrName(), fmt.Sprintf("--natpf%d", rule.Index), fmt.Sprintf("%v,%v,%v,%v,%v,%v", rule.Name, string(rule.Protocol), rule.HostIP, rule.HostPort, rule.GuestIP, rule.GuestPort))
+
+	_, err := vb.manage("modifyvm", vm.UUIDOrName(), fmt.Sprintf("--natpf%d", rule.NicIndex), fmt.Sprintf("%v,%v,%v,%v,%v,%v", rule.Name, string(rule.Protocol), rule.HostIP, rule.HostPort, rule.GuestIP, rule.GuestPort))
+	return err
+}
+
+func (vb *VBox) AddALlPortForw(vm *VirtualMachine, rule []PortForwarding) error {
+	args := []string{"modifyvm", vm.UUIDOrName()}
+	for i := 0; i < len(rule); i++ {
+		args = append(args, fmt.Sprintf("--natpf%d", rule[i].NicIndex), fmt.Sprintf("%v,%v,%v,%v,%v,%v", rule[i].Name, string(rule[i].Protocol),
+			rule[i].HostIP, rule[i].HostPort, rule[i].GuestIP, rule[i].GuestPort))
+	}
+	_, err := vb.manage(args...)
+	return err
+}
+
+func (vb *VBox) DeleteAllPortForw(vm *VirtualMachine, rule []PortForwarding) error {
+	args := []string{"modifyvm", vm.UUIDOrName()}
+	for i := 0; i < len(rule); i++ {
+		args = append(args, fmt.Sprintf("--natpf%d", rule[i].NicIndex), "delete", rule[i].Name)
+	}
+	_, err := vb.manage(args...)
 	return err
 }
 
